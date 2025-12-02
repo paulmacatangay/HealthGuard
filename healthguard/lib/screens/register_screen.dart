@@ -35,23 +35,105 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
+    
     final auth = context.read<AuthController>();
-    final error = await auth.register(
-      fullName: _fullNameController.text.trim(),
-      email: _emailController.text.trim(),
-      password: _passwordController.text.trim(),
-      contactNumber: _contactController.text.trim().isEmpty
-          ? null
-          : _contactController.text.trim(),
-    );
+    
+    try {
+      final error = await auth.register(
+        fullName: _fullNameController.text.trim(),
+        email: _emailController.text.trim(),
+        password: _passwordController.text.trim(),
+        contactNumber: _contactController.text.trim().isEmpty
+            ? null
+            : _contactController.text.trim(),
+      );
 
-    if (!mounted) return;
-    if (error != null) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(error)));
-    } else {
-      Navigator.of(context).pop();
+      if (!mounted) return;
+      
+      if (error != null) {
+        // Show error message
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(error),
+            backgroundColor: AppTheme.errorColor,
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      } else {
+        // Registration successful - show success message
+        if (mounted) {
+          // Show snackbar first
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: const Text('Registration successful! Please login to continue.'),
+              backgroundColor: AppTheme.successColor,
+              duration: const Duration(seconds: 4),
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+          
+          // Also show dialog for better visibility
+          await showDialog(
+            context: context,
+            barrierDismissible: false,
+            builder: (dialogContext) => AlertDialog(
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(
+                    Icons.check_circle,
+                    color: AppTheme.successColor,
+                    size: 64,
+                  ),
+                  const SizedBox(height: 16),
+                  const Text(
+                    'Registration Successful!',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 8),
+                  const Text(
+                    'Your account has been created. Please login to continue.',
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(dialogContext).pop(); // Close dialog
+                  },
+                  child: const Text('OK'),
+                ),
+              ],
+            ),
+          );
+        }
+        
+        if (!mounted) return;
+        
+        // Sign out the user (registration auto-logs them in)
+        await auth.signOut();
+        
+        if (!mounted) return;
+        
+        // Navigate to login screen
+        Navigator.of(context).pop();
+      }
+    } catch (e) {
+      // Catch any unexpected errors
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: ${e.toString()}'),
+            backgroundColor: AppTheme.errorColor,
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
     }
   }
 

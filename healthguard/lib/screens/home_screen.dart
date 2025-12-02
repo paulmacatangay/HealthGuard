@@ -36,6 +36,15 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  String _getWelcomeMessage(String? fullName) {
+    if (fullName == null || fullName.isEmpty) {
+      return 'Welcome back, Health Guardian';
+    }
+    // Extract first name (first word before space)
+    final firstName = fullName.split(' ').first;
+    return 'Welcome back, $firstName';
+  }
+
   @override
   Widget build(BuildContext context) {
     final controller = context.watch<AuthController>();
@@ -56,15 +65,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Welcome back,',
-                            style: TextStyle(
-                              color: Colors.white.withOpacity(0.9),
-                              fontSize: 16,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            user?.fullName ?? 'Health Guardian',
+                            _getWelcomeMessage(user?.fullName),
                             style: const TextStyle(
                               color: Colors.white,
                               fontSize: 28,

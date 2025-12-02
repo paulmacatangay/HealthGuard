@@ -16,25 +16,31 @@ class HealthService {
     required int sleepHours,
     String? notes,
   }) async {
-    if (_userId.isEmpty) return;
+    if (_userId.isEmpty) {
+      throw Exception('User not authenticated');
+    }
 
-    final today = DateTime.now();
-    final dateKey = '${today.year}-${today.month.toString().padLeft(2, '0')}-${today.day.toString().padLeft(2, '0')}';
+    try {
+      final today = DateTime.now();
+      final dateKey = '${today.year}-${today.month.toString().padLeft(2, '0')}-${today.day.toString().padLeft(2, '0')}';
 
-    await _firestore
-        .collection('users')
-        .doc(_userId)
-        .collection('checkIns')
-        .doc(dateKey)
-        .set({
-      'mood': mood,
-      'energyLevel': energyLevel,
-      'waterGlasses': waterGlasses,
-      'sleepHours': sleepHours,
-      'notes': notes ?? '',
-      'timestamp': FieldValue.serverTimestamp(),
-      'date': dateKey,
-    }, SetOptions(merge: true));
+      await _firestore
+          .collection('users')
+          .doc(_userId)
+          .collection('checkIns')
+          .doc(dateKey)
+          .set({
+        'mood': mood,
+        'energyLevel': energyLevel,
+        'waterGlasses': waterGlasses,
+        'sleepHours': sleepHours,
+        'notes': notes ?? '',
+        'timestamp': FieldValue.serverTimestamp(),
+        'date': dateKey,
+      }, SetOptions(merge: true));
+    } catch (e) {
+      throw Exception('Failed to save check-in: $e');
+    }
   }
 
   Future<Map<String, dynamic>?> getTodayCheckIn() async {
@@ -70,20 +76,41 @@ class HealthService {
   Future<List<Map<String, dynamic>>> getWeeklyStats() async {
     if (_userId.isEmpty) return [];
 
-    final now = DateTime.now();
-    final weekAgo = now.subtract(const Duration(days: 7));
-    final startDate = '${weekAgo.year}-${weekAgo.month.toString().padLeft(2, '0')}-${weekAgo.day.toString().padLeft(2, '0')}';
-    final endDate = '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
+    try {
+      final now = DateTime.now();
+      final weekAgo = now.subtract(const Duration(days: 7));
+      final startDate = '${weekAgo.year}-${weekAgo.month.toString().padLeft(2, '0')}-${weekAgo.day.toString().padLeft(2, '0')}';
+      final endDate = '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
 
-    final snapshot = await _firestore
-        .collection('users')
-        .doc(_userId)
-        .collection('checkIns')
-        .where('date', isGreaterThanOrEqualTo: startDate)
-        .where('date', isLessThanOrEqualTo: endDate)
-        .get();
+      final snapshot = await _firestore
+          .collection('users')
+          .doc(_userId)
+          .collection('checkIns')
+          .where('date', isGreaterThanOrEqualTo: startDate)
+          .where('date', isLessThanOrEqualTo: endDate)
+          .orderBy('date', descending: false)
+          .get();
 
-    return snapshot.docs.map((doc) => doc.data()).toList();
+      final data = snapshot.docs.map((doc) {
+        final docData = doc.data();
+        return {
+          ...docData,
+          'date': docData['date'] ?? doc.id,
+        };
+      }).toList();
+
+      // Sort by date to ensure proper order for charts
+      data.sort((a, b) {
+        final dateA = a['date'] as String? ?? '';
+        final dateB = b['date'] as String? ?? '';
+        return dateA.compareTo(dateB);
+      });
+
+      return data;
+    } catch (e) {
+      // Return empty list on error instead of throwing
+      return [];
+    }
   }
 }
 

@@ -41,9 +41,12 @@ class AuthController extends ChangeNotifier {
           password: password,
           contactNumber: contactNumber,
         );
-        return null;
+        return null; // Success - no error
       } on FirebaseAuthException catch (e) {
         return _mapError(e);
+      } catch (e) {
+        debugPrint('Registration error: $e');
+        return 'An unexpected error occurred. Please try again.';
       }
     });
   }
@@ -69,6 +72,7 @@ class AuthController extends ChangeNotifier {
     if (user == null) {
       _currentUser = null;
       _isInitializing = false;
+      _isBusy = false;
       notifyListeners();
       return;
     }
@@ -77,10 +81,20 @@ class AuthController extends ChangeNotifier {
     _isInitializing = false;
     notifyListeners();
 
-    _currentUser = await _authService.fetchProfile(user.uid);
-
-    _isBusy = false;
-    notifyListeners();
+    try {
+      _currentUser = await _authService.fetchProfile(user.uid);
+    } catch (e) {
+      debugPrint('Error loading user profile: $e');
+      // Create a fallback user from Firebase Auth data
+      _currentUser = AppUser(
+        uid: user.uid,
+        fullName: user.displayName ?? user.email?.split('@')[0] ?? 'User',
+        email: user.email ?? '',
+      );
+    } finally {
+      _isBusy = false;
+      notifyListeners();
+    }
   }
 
   Future<String?> _runWithLoading(Future<String?> Function() action) async {

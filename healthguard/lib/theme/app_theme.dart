@@ -2,13 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class AppTheme {
-  static const Color primaryColor = Color(0xFF00BFA5);
-  static const Color secondaryColor = Color(0xFF26A69A);
-  static const Color accentColor = Color(0xFF4DD0E1);
+  // Green color scheme matching the HealthGuard logo
+  static const Color primaryColor = Color(0xFF2E7D32); // Dark green (main logo color)
+  static const Color secondaryColor = Color(0xFF4CAF50); // Medium green
+  static const Color accentColor = Color(0xFF66BB6A); // Light green
   static const Color backgroundColor = Color(0xFFF5F7FA);
   static const Color surfaceColor = Colors.white;
   static const Color errorColor = Color(0xFFE57373);
-  static const Color successColor = Color(0xFF81C784);
+  static const Color successColor = Color(0xFF4CAF50); // Green for success
   static const Color warningColor = Color(0xFFFFB74D);
 
   static ThemeData get lightTheme {
@@ -67,10 +68,10 @@ class AppTheme {
         ),
         bodyMedium: GoogleFonts.poppins(
           fontSize: 14,
-          color: Colors.black70,
+          color: Colors.black87,
         ),
       ),
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
         elevation: 2,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
@@ -120,9 +121,9 @@ class AppTheme {
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,
         colors: [
-          primaryColor,
-          secondaryColor,
-          accentColor,
+          primaryColor, // Dark green
+          secondaryColor, // Medium green
+          accentColor, // Light green
         ],
       ),
     );

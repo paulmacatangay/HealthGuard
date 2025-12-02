@@ -185,13 +185,18 @@ class _StatsScreenState extends State<StatsScreen> {
   }
 
   Widget _buildEnergyChart() {
-    if (_weeklyData.isEmpty) return const SizedBox.shrink();
+    if (_weeklyData.isEmpty) {
+      return _buildEmptyChart('Energy Level Trend', 'No data available. Start checking in daily!');
+    }
 
     final energyData = _weeklyData
         .map((e) => (e['energyLevel'] as num?)?.toDouble() ?? 0.0)
-        .toList()
-        .reversed
+        .where((e) => e > 0)
         .toList();
+
+    if (energyData.isEmpty) {
+      return _buildEmptyChart('Energy Level Trend', 'No energy data available.');
+    }
 
     return _buildChart(
       title: 'Energy Level Trend',
@@ -202,12 +207,12 @@ class _StatsScreenState extends State<StatsScreen> {
   }
 
   Widget _buildWaterChart() {
-    if (_weeklyData.isEmpty) return const SizedBox.shrink();
+    if (_weeklyData.isEmpty) {
+      return _buildEmptyChart('Water Intake Trend', 'No data available. Start checking in daily!');
+    }
 
     final waterData = _weeklyData
         .map((e) => (e['waterGlasses'] as num?)?.toDouble() ?? 0.0)
-        .toList()
-        .reversed
         .toList();
 
     return _buildChart(
@@ -219,13 +224,18 @@ class _StatsScreenState extends State<StatsScreen> {
   }
 
   Widget _buildSleepChart() {
-    if (_weeklyData.isEmpty) return const SizedBox.shrink();
+    if (_weeklyData.isEmpty) {
+      return _buildEmptyChart('Sleep Hours Trend', 'No data available. Start checking in daily!');
+    }
 
     final sleepData = _weeklyData
         .map((e) => (e['sleepHours'] as num?)?.toDouble() ?? 0.0)
-        .toList()
-        .reversed
+        .where((e) => e > 0)
         .toList();
+
+    if (sleepData.isEmpty) {
+      return _buildEmptyChart('Sleep Hours Trend', 'No sleep data available.');
+    }
 
     return _buildChart(
       title: 'Sleep Hours Trend',
@@ -241,6 +251,9 @@ class _StatsScreenState extends State<StatsScreen> {
     required Color color,
     required double maxY,
   }) {
+    // Ensure we have at least 2 points for a line chart
+    final chartData = data.length == 1 ? [data[0], data[0]] : data;
+    
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -274,10 +287,10 @@ class _StatsScreenState extends State<StatsScreen> {
                 lineBarsData: [
                   LineChartBarData(
                     spots: List.generate(
-                      data.length,
-                      (index) => FlSpot(index.toDouble(), data[index]),
+                      chartData.length,
+                      (index) => FlSpot(index.toDouble(), chartData[index]),
                     ),
-                    isCurved: true,
+                    isCurved: chartData.length > 2,
                     color: color,
                     barWidth: 3,
                     dotData: FlDotData(show: true),
@@ -289,6 +302,47 @@ class _StatsScreenState extends State<StatsScreen> {
                 ],
                 minY: 0,
                 maxY: maxY,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEmptyChart(String title, String message) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+          ),
+          const SizedBox(height: 20),
+          SizedBox(
+            height: 200,
+            child: Center(
+              child: Text(
+                message,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: Colors.grey,
+                    ),
+                textAlign: TextAlign.center,
               ),
             ),
           ),
