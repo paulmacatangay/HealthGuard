@@ -68,3 +68,4 @@ Common issues:
 - **"Authentication failed"** → Enable Email/Password auth in Firebase Console
 
 
+
