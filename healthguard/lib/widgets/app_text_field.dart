@@ -9,6 +9,7 @@ class AppTextField extends StatelessWidget {
     this.keyboardType,
     this.obscureText = false,
     this.validator,
+    this.suffixIcon,
   });
 
   final TextEditingController controller;
@@ -16,6 +17,7 @@ class AppTextField extends StatelessWidget {
   final TextInputType? keyboardType;
   final bool obscureText;
   final String? Function(String?)? validator;
+  final Widget? suffixIcon;
 
   @override
   Widget build(BuildContext context) {
@@ -50,6 +52,7 @@ class AppTextField extends StatelessWidget {
           borderSide: const BorderSide(color: AppTheme.errorColor, width: 2),
         ),
         contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+        suffixIcon: suffixIcon,
       ),
     );
   }

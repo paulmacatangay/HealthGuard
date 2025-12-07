@@ -60,22 +60,22 @@ class _SplashScreenState extends State<SplashScreen>
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   // Logo/Icon - Display full without cropping
-                  SizedBox(
-                    width: 250,
-                    height: 250,
-                    child: Image.asset(
-                      'assets/logo/app_icon.png',
-                      fit: BoxFit.contain,
-                      width: 250,
-                      height: 250,
-                      errorBuilder: (context, error, stackTrace) {
-                        // Fallback to icon if image not found
-                        return const Icon(
-                          Icons.health_and_safety,
-                          size: 200,
-                          color: AppTheme.primaryColor,
-                        );
-                      },
+                  // Using Flexible to allow natural sizing
+                  Flexible(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 40),
+                      child: Image.asset(
+                        'assets/logo/app_icon.png',
+                        fit: BoxFit.contain,
+                        errorBuilder: (context, error, stackTrace) {
+                          // Fallback to icon if image not found
+                          return const Icon(
+                            Icons.health_and_safety,
+                            size: 200,
+                            color: AppTheme.primaryColor,
+                          );
+                        },
+                      ),
                     ),
                   ),
                   const SizedBox(height: 32),

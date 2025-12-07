@@ -67,6 +67,33 @@ class AuthController extends ChangeNotifier {
 
   Future<void> signOut() => _authService.signOut();
 
+  Future<String?> resetPassword(String email) async {
+    return _runWithLoading(() async {
+      try {
+        await _authService.resetPassword(email);
+        return null; // Success
+      } on FirebaseAuthException catch (e) {
+        return _mapPasswordResetError(e);
+      } catch (e) {
+        debugPrint('Password reset error: $e');
+        return 'An unexpected error occurred. Please try again.';
+      }
+    });
+  }
+
+  String _mapPasswordResetError(FirebaseAuthException exception) {
+    switch (exception.code) {
+      case 'invalid-email':
+        return 'Please enter a valid email address.';
+      case 'user-not-found':
+        return 'No account found with this email address.';
+      case 'too-many-requests':
+        return 'Too many requests. Please try again later.';
+      default:
+        return 'Something went wrong. Please try again.';
+    }
+  }
+
   Future<void> _onAuthStateChanged(User? user) async {
     _firebaseUser = user;
     if (user == null) {

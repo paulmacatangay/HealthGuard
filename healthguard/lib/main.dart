@@ -8,6 +8,7 @@ import 'firebase_options.dart';
 import 'screens/main_navigation.dart';
 import 'screens/login_screen.dart';
 import 'screens/register_screen.dart';
+import 'screens/forgot_password_screen.dart';
 import 'screens/splash_screen.dart';
 import 'theme/app_theme.dart';
 
@@ -31,6 +32,7 @@ class SDGApp extends StatelessWidget {
         routes: {
           LoginScreen.routeName: (_) => const LoginScreen(),
           RegisterScreen.routeName: (_) => const RegisterScreen(),
+          ForgotPasswordScreen.routeName: (_) => const ForgotPasswordScreen(),
         },
         home: const AuthGate(),
       ),
